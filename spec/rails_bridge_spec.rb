@@ -5,7 +5,7 @@ describe RailsBridge do
     RailsBridge.kind_of?( Module ).should == true
   end
 
-  it "loads necessary classes" do
+  it "loads necessary classes", :focus=>false do
     RailsBridge::ContentBridge.new.is_a?( RailsBridge::ContentBridge ).should == true
   end
 end
