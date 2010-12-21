@@ -15,6 +15,8 @@ begin
     gem.email = "billdoughty@capitalthought.com"
     gem.homepage = "http://github.com/capitalthought/rails-bridge"
     gem.authors = ["shock"]
+    gem.add_development_dependency "typhoeus", "~> 0.2.0"    
+
   end
   #Jeweler::GemcutterTasks.new
 rescue LoadError

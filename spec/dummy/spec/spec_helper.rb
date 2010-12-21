@@ -24,4 +24,10 @@ RSpec.configure do |config|
   # examples within a transaction, remove the following line or assign false
   # instead of true.
   config.use_transactional_fixtures = true
+  
+  
+  # Only run focus tests, if any, or all tests if none.
+  config.filter_run :focus => true
+  config.run_all_when_everything_filtered = true
+  
 end
