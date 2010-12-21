@@ -48,7 +48,12 @@ GEM
       abstract (>= 1.0.0)
     ffi (0.6.3)
       rake (>= 0.8.7)
+    git (1.2.5)
     i18n (0.5.0)
+    jeweler (1.5.1)
+      bundler (~> 1.0.0)
+      git (>= 1.2.5)
+      rake
     json_pure (1.4.6)
     mail (2.2.12)
       activesupport (>= 2.3.6)
@@ -109,6 +114,7 @@ PLATFORMS
 
 DEPENDENCIES
   capybara (>= 0.4.0)
+  jeweler
   rails (= 3.0.3)
   rspec
   rspec-rails

@@ -6,6 +6,21 @@ rescue LoadError
   puts 'You must `gem install bundler` and `bundle install` to run rake tasks'
 end
 
+begin
+  require 'jeweler'
+  Jeweler::Tasks.new do |gem|
+    gem.name = "rails-bridge"
+    gem.summary = %Q{Bridges Rails without an external application allowing for easy embedding of content from a remote HTTP server and automatic exporting of the Rails HTML layout into another template.}
+    gem.description = %Q{}
+    gem.email = "billdoughty@capitalthought.com"
+    gem.homepage = "http://github.com/capitalthought/rails-bridge"
+    gem.authors = ["shock"]
+  end
+  #Jeweler::GemcutterTasks.new
+rescue LoadError
+  puts "Jeweler (or a dependency) not available. Install it with: sudo gem install jeweler"
+end
+
 require 'rake'
 require 'rake/rdoctask'
 
