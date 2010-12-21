@@ -44,6 +44,3 @@ Rake::RDocTask.new(:rdoc) do |rdoc|
   rdoc.rdoc_files.include('lib/**/*.rb')
 end
 
-task :test_console do
-  `irb -r #{File.dirname(__FILE__)}/lib/rails_bridge`
-end
