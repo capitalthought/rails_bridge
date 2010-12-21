@@ -1,0 +1,2 @@
+module RailsBridge
+end
