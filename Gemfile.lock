@@ -43,6 +43,7 @@ GEM
     childprocess (0.1.4)
       ffi (~> 0.6.3)
     culerity (0.2.13)
+    diff-lcs (1.1.2)
     erubis (2.6.6)
       abstract (>= 1.0.0)
     ffi (0.6.3)
@@ -76,6 +77,19 @@ GEM
       rake (>= 0.8.7)
       thor (~> 0.14.4)
     rake (0.8.7)
+    rspec (2.2.0)
+      rspec-core (~> 2.2)
+      rspec-expectations (~> 2.2)
+      rspec-mocks (~> 2.2)
+    rspec-core (2.2.1)
+    rspec-expectations (2.2.0)
+      diff-lcs (~> 1.1.2)
+    rspec-mocks (2.2.0)
+    rspec-rails (2.2.1)
+      actionpack (~> 3.0)
+      activesupport (~> 3.0)
+      railties (~> 3.0)
+      rspec (~> 2.2.0)
     rubyzip (0.9.4)
     selenium-webdriver (0.1.1)
       childprocess (= 0.1.4)
@@ -96,4 +110,6 @@ PLATFORMS
 DEPENDENCIES
   capybara (>= 0.4.0)
   rails (= 3.0.3)
+  rspec
+  rspec-rails
   sqlite3-ruby
