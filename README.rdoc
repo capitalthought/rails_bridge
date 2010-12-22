@@ -1,2 +1,68 @@
-= RailsBridge
+= rails-bridge
 
+* http://github.com/capitalthought/rails-bridge
+
+== DESCRIPTION:
+
+Easy embedding of remote content into your Rails app.
+
+== SYNOPSIS:
+
+Sometimes, it is desirable to embed content from a remote server directly into the HTML, XML, or Javascript returned by your Rails application.
+
+The remote server may be an external application, a web service, or any other resource available on the network.  
+
+RailsBridge makes it easy to retrieve content from these external resources in an efficient manner.
+
+== FEATURES:
+
+* Simple definition of remote content resources
+* Automatic cacheing of remote content
+
+== INSTALL:
+
+rails-bridge is installed as a Ruby gem.  
+
+  gem install rails-bridge
+
+== USAGE:
+
+Include the gem in your Gemfile.
+
+  gem 'rails-bridge'
+
+Initialize default options for the ContentBridge.
+
+  RailsBridge::ContentBridge.logger = Rails.logger
+  RailsBridge::ContentBridge.logger = Rails.logger
+
+== TODO:
+
+* Auto-set the logger to Rails.logger
+
+== CONTRIBUTING:
+
+=== TESTS:
+
+RSpec 2.x is used for the Rails Bridge test suite.  To run the suite:
+
+  rake
+  
+or
+  rake spec
+
+=== LICENSE:
+
+  Copyright 2010 Capital Thought, LLC
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use any part of this software or its source code except 
+  in compliance with the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.

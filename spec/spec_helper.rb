@@ -1,27 +1,44 @@
 # Configure Rails Envinronment
 ENV["RAILS_ENV"] = "test"
 
-require File.expand_path("../dummy/config/environment.rb",  __FILE__)
-# require "rails/test_help"
-require "rspec/rails"
+LOG_TO_STDOUT = false
+require "spec_helpers/textmate"
 
-ActionMailer::Base.delivery_method = :test
-ActionMailer::Base.perform_deliveries = true
-ActionMailer::Base.default_url_options[:host] = "test.com"
+def integration_test?
+  false
+end
 
-Rails.backtrace_cleaner.remove_silencers!
+if running_in_textmate? && !integration_test?
+  require 'logger'
+  require 'active_support/core_ext/logger'
+  require File.join(File.dirname(__FILE__),'..','lib','rails_bridge')
 
-# Configure capybara for integration testing
-require "capybara/rails"
-Capybara.default_driver   = :rack_test
-Capybara.default_selector = :css
+else
+  require File.expand_path("../dummy/config/environment.rb",  __FILE__)
+  require "rails/test_help"
+  require "rspec/rails"
 
-# Run any available migration
-ActiveRecord::Migrator.migrate File.expand_path("../dummy/db/migrate/", __FILE__)
+  ActionMailer::Base.delivery_method = :test
+  ActionMailer::Base.perform_deliveries = true
+  ActionMailer::Base.default_url_options[:host] = "test.com"
+
+  Rails.backtrace_cleaner.remove_silencers!
+
+  # Configure capybara for integration testing
+  require "capybara/rails"
+  Capybara.default_driver   = :rack_test
+  Capybara.default_selector = :css
+
+  # Run any available migration
+  ActiveRecord::Migrator.migrate File.expand_path("../dummy/db/migrate/", __FILE__)
+
+end
+
+require "spec_helpers/rails_bridge"
+require "spec_helpers/test_server"
 
 # Load support files
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
-
 
 RSpec.configure do |config|
   # == Mock Framework
@@ -36,8 +53,8 @@ RSpec.configure do |config|
   # If you're not using ActiveRecord, or you'd prefer not to run each of your
   # examples within a transaction, remove the following line or assign false
   # instead of true.
-  config.use_transactional_fixtures = false
-  config.filter_run :focus => true
+  # config.use_transactional_fixtures = false
+  # config.filter_run :focus => true
   config.run_all_when_everything_filtered = true
   
 end

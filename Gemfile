@@ -13,4 +13,6 @@ gem 'typhoeus', '~> 0.2.0'
 group :test, :development do
   gem 'rspec'
   gem 'rspec-rails'
+  gem 'eventmachine'
+  gem 'dalli'
 end
