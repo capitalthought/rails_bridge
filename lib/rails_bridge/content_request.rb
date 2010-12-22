@@ -7,7 +7,7 @@ module RailsBridge
     # Options:
     # * :default_content - Content to be returned in test mode or when the remote server is unavailable
     # * :request_timeout - Maximum time to wait for successful response in ms
-    # * :cache_timeout - TTL expiry for cache in seconds - nil or 0 will prevent cacheing
+    # * :cache_timeout - TTL expiry for cache in seconds - nil or 0 will prevent caching
     # * :protocol - Protocol of remote server (http|https).  Default is 'http'
     # * :host - Host of remote server.  
     # * :port - Port of remote server.  Default is 80.

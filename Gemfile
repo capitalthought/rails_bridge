@@ -1,9 +1,6 @@
 source "http://rubygems.org"
 
 gem "rails", "3.0.3"
-gem "capybara", ">= 0.4.0"
-gem "sqlite3-ruby", :require => "sqlite3"
-gem 'jeweler'
 gem 'typhoeus', '~> 0.2.0'
 
 # To use debugger (ruby-debug for Ruby 1.8.7+, ruby-debug19 for Ruby 1.9.2+)
@@ -11,8 +8,12 @@ gem 'typhoeus', '~> 0.2.0'
 # gem 'ruby-debug19'
 
 group :test, :development do
+  gem 'jeweler'
+  gem "sqlite3-ruby", :require => "sqlite3"
+  gem "capybara", ">= 0.4.0"
   gem 'rspec'
   gem 'rspec-rails'
   gem 'eventmachine'
   gem 'dalli'
+  gem 'syntax'
 end

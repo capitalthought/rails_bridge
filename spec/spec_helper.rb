@@ -5,7 +5,7 @@ LOG_TO_STDOUT = false
 require "spec_helpers/textmate"
 
 def integration_test?
-  false
+  true
 end
 
 if running_in_textmate? && !integration_test?

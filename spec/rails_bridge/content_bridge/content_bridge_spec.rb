@@ -133,13 +133,24 @@ describe RailsBridge::ContentBridge do
       cbt.get_chang(:cache_timeout=>0,:request_timeout=>10).should == cbt.content_requests[:chang].default_content
     end
 
-    it "caches a request's content when the cache_timeout is 0 or nil" do
+    it "caches a request's content when the cache_timeout is > 0" do
       unique = __LINE__
       cbt = ContentBridgeTest
       chang = cbt.content_requests[:chang]
       cbt.get_chang(:cache_timeout=>60,:params=>chang.params.merge(:unique=>unique)).should == DEFAULT_RETURN_DATA
       TestServer.shutdown
       cbt.get_chang(:cache_timeout=>60,:params=>chang.params.merge(:unique=>unique)).should == DEFAULT_RETURN_DATA
+    end
+
+    it "the cache expires correctly" do
+      unique = __LINE__
+      cbt = ContentBridgeTest
+      chang = cbt.content_requests[:chang]
+      cbt.get_chang(:cache_timeout=>2,:params=>chang.params.merge(:unique=>unique)).should == DEFAULT_RETURN_DATA
+      TestServer.shutdown
+      cbt.get_chang(:cache_timeout=>2,:params=>chang.params.merge(:unique=>unique)).should == DEFAULT_RETURN_DATA
+      sleep 2
+      cbt.get_chang(:cache_timeout=>2,:params=>chang.params.merge(:unique=>unique)).should == cbt.content_requests[:chang].default_content
     end
   end
   

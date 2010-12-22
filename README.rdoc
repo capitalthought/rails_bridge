@@ -17,7 +17,7 @@ RailsBridge makes it easy to retrieve content from these external resources in a
 == FEATURES:
 
 * Simple definition of remote content resources
-* Automatic cacheing of remote content
+* Automatic caching of remote content using the configured Rails cache
 
 == INSTALL:
 
