@@ -25,7 +25,6 @@ Gem::Specification.new do |s|
     "README.rdoc",
     "Rakefile",
     "VERSION",
-    "lib/rails-bridge.rb",
     "lib/rails_bridge.rb",
     "lib/rails_bridge/content_bridge.rb",
     "lib/rails_bridge/content_request.rb",

@@ -1,6 +1,6 @@
-= rails-bridge
+= Rails Bridge
 
-* http://github.com/capitalthought/rails-bridge
+* http://github.com/capitalthought/rails_bridge
 
 == DESCRIPTION:
 
@@ -21,15 +21,15 @@ RailsBridge makes it easy to retrieve content from these external resources in a
 
 == INSTALL:
 
-rails-bridge is installed as a Ruby gem.  
+rails_bridge is installed as a Ruby gem.  
 
-  gem install rails-bridge
+  gem install rails_bridge
 
 == USAGE:
 
 Include the gem in your Gemfile.
 
-  gem 'rails-bridge'
+  gem 'rails_bridge'
 
 Initialize default options for the ContentBridge.
 
