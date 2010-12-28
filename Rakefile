@@ -10,13 +10,13 @@ begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
     gem.name = "rails_bridge"
-    gem.summary = %Q{Bridges Rails without an external application allowing for easy embedding of content from a remote HTTP server and automatic exporting of the Rails HTML layout into another template.}
-    gem.description = %Q{}
+    gem.summary = %Q{Bridges Rails with an external application.}
+    gem.description = %Q{Allows for easy embedding of content from a remote HTTP server and exporting of the Rails HTML layout into another template.}
     gem.email = "billdoughty@capitalthought.com"
     gem.homepage = "http://github.com/capitalthought/rails_bridge"
     gem.authors = ["shock"]
-    gem.add_development_dependency "typhoeus", "~> 0.2.0"    
-
+    gem.add_development_dependency "typhoeus", "~> 0.2.0"
+    gem.add_development_dependency "activesupport", ">= 2.3.8"    
   end
   #Jeweler::GemcutterTasks.new
 rescue LoadError

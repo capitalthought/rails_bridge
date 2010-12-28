@@ -1,4 +1,5 @@
 require 'typhoeus'
+require 'active_support/core_ext/logger'
 
 module RailsBridge
   # = ContentBridge
@@ -12,51 +13,44 @@ module RailsBridge
     DEFAULT_CACHE_TIMEOUT = 0
 
     # Class Attributes
-    class_inheritable_accessor :protocol, :host, :port, :request_timeout, :cache_timeout, :default_content
+    class_inheritable_accessor :protocol, :host, :port, :path, :params, :request_timeout, :cache_timeout, :default_content
+    class_inheritable_accessor :cache, :logger
     @@content_requests = {}
-    @@cache = nil
-    @@logger = Logger.new(STDOUT)
+    @@on_success = nil
         
     # Initialize Default Class Attribute Values
     self.request_timeout = DEFAULT_REQUEST_TIMEOUT
     self.cache_timeout = DEFAULT_CACHE_TIMEOUT
     self.default_content = DEFAULT_CONTENT    
+    self.cache = nil
+    self.logger = Logger.new(File.open("/dev/null", 'w'))
     
     
     class << self
       # custom accessor methods
       def content_requests; @@content_requests; end
-      def logger; @@logger; end
-      def logger=(logger); @@logger=logger; end
-      def cache; @@cache; end
-      def cache=(cache); @@cache=cache; end
-        
-      def cache_set key, body, time_to_live
-        if time_to_live && time_to_live > 0
-          expire_time = Time.now + time_to_live
-          cache_envelope = {
-            :body => body,
-            :expire_time => expire_time
-          }
-          @@cache.write( key, cache_envelope )
+
+      def on_success
+        if block_given?
+          @@on_success = Proc.new
         else
-          @@cache.delete(key)
+          @@on_success
         end
+      end
+
+      def on_success=(proc)
+        @@on_success = proc
+      end
+
+        
+      def cache_set key, content, expires_in
+        logger.debug "set key: #{key}"
+        self.cache.write( key, content, :expires_in=>expires_in )
       end
       
       def cache_get key
-        cache_envelope = @@cache.read(key)
-        body = if cache_envelope
-          if cache_envelope[:expire_time] > Time.now
-            cache_envelope[:body]
-          else
-            @@cache.delete(key)
-            nil
-          end
-        else
-          nil
-        end
-        body
+        logger.debug "get key: #{key}"
+        content = self.cache.fetch(key, :race_condition_ttl=>5.seconds)
       end
 
       
@@ -73,8 +67,10 @@ module RailsBridge
           options[:request_timeout] ||= content_request.request_timeout
           options[:cache_timeout] ||= content_request.cache_timeout
           options[:default_content] ||= content_request.default_content
+          on_success = content_request.on_success
         else
           remote_url = remote
+          on_sucess = nil
         end
         options[:request_timeout] ||= self.request_timeout
         options[:cache_timeout] ||= self.cache_timeout
@@ -83,18 +79,22 @@ module RailsBridge
         # options[:verbose] = true # for debugging only
         
         request = Typhoeus::Request.new(remote_url, options)
-        unless @@cache && result = cache_get( request.cache_key )
+        unless self.cache && request.cache_timeout && request.cache_timeout > 0 && result = cache_get( request.cache_key )
           result = default_content
           request.on_complete do |response|
             case response.code
             when 200
-              result = response.body
-              cache_set( request.cache_key, result, request.cache_timeout ) if @@cache && request.cache_timeout && request.cache_timeout > 0
-              logger.debug "ContentBridge : Request Received Content: #{result}"
+              if on_success
+                result = on_success.call(response.body)
+              else
+                result = response.body
+              end
+              cache_set( request.cache_key, result, request.cache_timeout ) if self.cache && request.cache_timeout && request.cache_timeout > 0
+              logger.debug "ContentBridge : Request Succeeded - Content: #{result}"
             when 0
-              logger.error "ContentBridge : Request Timeout for #{remote_url}"
+              logger.warn "ContentBridge : Request Timeout for #{remote_url}"
             else
-              logger.error "ContentBridge : Request for #{remote_url}\mRequest Failed with HTTP result code: #{response.code}\n#{response.body}"
+              logger.warn "ContentBridge : Request for #{remote_url}\mRequest Failed with HTTP result code: #{response.code}\n#{response.body}"
             end        
           end
           hydra.queue request
@@ -108,11 +108,11 @@ module RailsBridge
         begin
           raise "WARNING: Already defined content_request '#{name}'" if @@content_requests.key?( name )
         rescue
-          logger.warning $!.message
-          logger.warning $!.backtrace * "\n"
+          logger.warn $!.message
+          logger.warn $!.backtrace * "\n"
         end
         new_request = ContentRequest.new options
-        yield new_request
+        yield new_request if block_given?
         @@content_requests[name] = new_request
         new_request.content_bridge = self
         new_request

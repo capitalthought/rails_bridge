@@ -5,14 +5,13 @@ LOG_TO_STDOUT = false
 require "spec_helpers/textmate"
 
 def integration_test?
-  true
+  $0 =~ /integration/
 end
 
 if running_in_textmate? && !integration_test?
   require 'logger'
   require 'active_support/core_ext/logger'
   require File.join(File.dirname(__FILE__),'..','lib','rails_bridge')
-
 else
   require File.expand_path("../dummy/config/environment.rb",  __FILE__)
   require "rails/test_help"

@@ -3,9 +3,10 @@ end
 
 require 'active_support/core_ext/class'
 require 'active_support/core_ext/hash'
+require 'active_support/cache'
 $basedir = File.dirname(__FILE__)
-require File.join( $basedir, 'rails_bridge', 'content_bridge' )
 require File.join( $basedir, 'rails_bridge', 'content_request' )
+require File.join( $basedir, 'rails_bridge', 'content_bridge' )
 
 if defined? Rails
   module RailsBridge
@@ -24,12 +25,7 @@ if defined? Rails
       
     end
   end
-  
-  # class RailsBridge::LoggerProxy
-  #   def method_missing method, *args
-  #     Rails.logger.send( method, *args )
-  #   end
-  # end
-  # RailsBridge::ContentBridge.logger = RailsBridge::LoggerProxy.new
+else
+  RailsBridge::ContentBridge.cache = ActiveSupport::Cache.lookup_store(:memory_store)
 end
 

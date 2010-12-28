@@ -5,5 +5,5 @@ if defined?(LOG_TO_STDOUT) && LOG_TO_STDOUT
     Rails.logger = Logger.new(STDOUT)
   end
 else
-  RailsBridge::ContentBridge.logger = Logger.new(File.open(log_filename,'w')) unless defined?( Rails )
+  RailsBridge::ContentBridge.logger = Logger.new(File.open(log_filename,'a')) unless defined?( Rails )
 end

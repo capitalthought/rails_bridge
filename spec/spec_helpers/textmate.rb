@@ -3,6 +3,7 @@ def running_in_textmate?
 end
 
 if running_in_textmate? && ENV["TM_SHOW_LOGS"]
+  require 'active_support/core_ext/logger'
   class Logger
     alias :orig_info :info
     alias :orig_debug :debug

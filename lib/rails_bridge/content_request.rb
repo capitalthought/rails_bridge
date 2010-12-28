@@ -2,7 +2,9 @@ require 'uri'
 
 module RailsBridge
   class ContentRequest
-    attr_accessor :default_content, :request_timeout, :cache_timeout, :protocol, :host, :port, :path, :params, :url, :content_bridge
+    attr_accessor :default_content, :request_timeout, :cache_timeout, :protocol, :host, :port, :path, :params, :content_bridge
+    attr_accessor :on_success
+    attr :url
     
     # Options:
     # * :default_content - Content to be returned in test mode or when the remote server is unavailable
@@ -18,17 +20,12 @@ module RailsBridge
     #     if the :url option is passed, the :protocol, :host, :port, :path, :params, and :fragment options are ignored
     def initialize options={}
       if url = options[:url]
-        uri = URI.parse( url )
-        self.protocol = uri.scheme
-        self.host = uri.host
-        self.port = uri.port
-        self.path = uri.path
-        self.params = extract_query_params( uri.query )
+        self.url = url
       else
-        self.protocol = options[:protocol] || 'http'
+        self.protocol = options[:protocol]
         self.host = options[:host]
-        self.port = options[:port] || 80
-        self.path = options[:path] || '/'
+        self.port = options[:port]
+        self.path = options[:path]
         self.params = options[:params]
       end
       self.default_content = options[:default_content]
@@ -36,9 +33,23 @@ module RailsBridge
       self.cache_timeout = options[:cache_timeout]
     end
     
+    def protocol;   @protocol   || (self.content_bridge && self.content_bridge.protocol) || 'http'; end
+    def host;       @host       || (self.content_bridge && self.content_bridge.host);               end
+    def port;       @port       || (self.content_bridge && self.content_bridge.port)  || 80;        end
+    def path;       @path       || (self.content_bridge && self.content_bridge.path) || '/';        end
+    def params;     @params     || (self.content_bridge && self.content_bridge.params);             end
+    
+    def url= url
+      uri = URI.parse( url )
+      self.protocol = uri.scheme
+      self.host = uri.host
+      self.port = uri.port
+      self.path = uri.path
+      self.params = extract_query_params( uri.query )
+    end
+    
     # We don't include the params in the URL, because Typhoeus::Request takes them as a separate argument
     def url
-      # query = self.params ? encode_query_params( self.params ) : nil
       URI::Generic.new( self.protocol, nil, self.host, self.port, nil, self.path, nil, nil, nil, true ).to_s
     end
     
@@ -50,8 +61,21 @@ module RailsBridge
       end
     end
     
+    def on_success
+      if block_given?
+        @on_success = Proc.new
+      else
+        @on_success || (self.content_bridge && self.content_bridge.on_success);
+      end
+    end
+
+    def on_success=(proc)
+      @on_success = proc
+    end
+    
     private 
      def extract_query_params query
+       return nil if query.nil?
        query = CGI::unescape( query )
        pairs = query.split("&")
        params = pairs.inject({}){|hash, pair| k,v=pair.split('='); v.nil? ? hash : (hash[k.to_sym]=v;hash)}
@@ -71,6 +95,6 @@ module RailsBridge
        end
        new_params
      end
-      
+              
   end
 end

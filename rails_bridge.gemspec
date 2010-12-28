@@ -9,8 +9,8 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["shock"]
-  s.date = %q{2010-12-22}
-  s.description = %q{}
+  s.date = %q{2010-12-28}
+  s.description = %q{Allows for easy embedding of content from a remote HTTP server and exporting of the Rails HTML layout into another template.}
   s.email = %q{billdoughty@capitalthought.com}
   s.extra_rdoc_files = [
     "README",
@@ -79,7 +79,7 @@ Gem::Specification.new do |s|
   s.homepage = %q{http://github.com/capitalthought/rails_bridge}
   s.require_paths = ["lib"]
   s.rubygems_version = %q{1.3.7}
-  s.summary = %q{Bridges Rails without an external application allowing for easy embedding of content from a remote HTTP server and automatic exporting of the Rails HTML layout into another template.}
+  s.summary = %q{Bridges Rails with an external application.}
   s.test_files = [
     "spec/dummy/app/controllers/application_controller.rb",
     "spec/dummy/app/controllers/client_app_controller.rb",
@@ -105,6 +105,7 @@ Gem::Specification.new do |s|
     "spec/rails_bridge_spec.rb",
     "spec/spec_helper.rb",
     "spec/spec_helpers/rails_bridge.rb",
+    "spec/spec_helpers/simple_cache.rb",
     "spec/spec_helpers/test_server.rb",
     "spec/spec_helpers/textmate.rb"
   ]
@@ -125,6 +126,7 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<dalli>, [">= 0"])
       s.add_development_dependency(%q<syntax>, [">= 0"])
       s.add_development_dependency(%q<typhoeus>, ["~> 0.2.0"])
+      s.add_development_dependency(%q<activesupport>, [">= 2.3.8"])
     else
       s.add_dependency(%q<rails>, ["= 3.0.3"])
       s.add_dependency(%q<typhoeus>, ["~> 0.2.0"])
@@ -137,6 +139,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<dalli>, [">= 0"])
       s.add_dependency(%q<syntax>, [">= 0"])
       s.add_dependency(%q<typhoeus>, ["~> 0.2.0"])
+      s.add_dependency(%q<activesupport>, [">= 2.3.8"])
     end
   else
     s.add_dependency(%q<rails>, ["= 3.0.3"])
@@ -150,6 +153,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<dalli>, [">= 0"])
     s.add_dependency(%q<syntax>, [">= 0"])
     s.add_dependency(%q<typhoeus>, ["~> 0.2.0"])
+    s.add_dependency(%q<activesupport>, [">= 2.3.8"])
   end
 end
 

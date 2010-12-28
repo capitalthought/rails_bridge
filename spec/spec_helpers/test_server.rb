@@ -116,7 +116,7 @@ class TestServer
   end
 end
 
-if __FILE__==$0
+if __FILE__ == $0
   require 'typhoeus'
   TestServer.startup
   response = Typhoeus::Request.get("http://localhost:1234/hi?sleep=1&return_data=verified")

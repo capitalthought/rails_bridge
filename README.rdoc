@@ -2,47 +2,132 @@
 
 * http://github.com/capitalthought/rails_bridge
 
-== DESCRIPTION:
+== DESCRIPTION
 
 Easy embedding of remote content into your Rails app.
 
-== SYNOPSIS:
+== SYNOPSIS
 
-Sometimes, it is desirable to embed content from a remote server directly into the HTML, XML, or Javascript returned by your Rails application.
+RailsBridge has two components
 
-The remote server may be an external application, a web service, or any other resource available on the network.  
+* RailsBridge::ContentBridge - Allows for easy embedding of content from a remote server directly into the HTML, XML, or Javascript returned by your Rails application.  The remote server may be an external application, a web service, or any other resource available via HTTP on the network.  
+* RailsBridge::LayoutBridge - Allows easy exporting of your Rails HTML layouts as templates for other applications.
 
-RailsBridge makes it easy to retrieve content from these external resources in an efficient manner.
-
-== FEATURES:
-
-* Simple definition of remote content resources
-* Automatic caching of remote content using the configured Rails cache
-
-== INSTALL:
+== INSTALLATION
 
 rails_bridge is installed as a Ruby gem.  
 
   gem install rails_bridge
 
-== USAGE:
-
 Include the gem in your Gemfile.
 
   gem 'rails_bridge'
 
-Initialize default options for the ContentBridge.
+== USING CONTENT BRIDGE
 
-  RailsBridge::ContentBridge.logger = Rails.logger
-  RailsBridge::ContentBridge.logger = Rails.logger
+=== Declaring remote requests
 
-== TODO:
+Access to remote content sources is defined by creating "content requests".
 
-* Auto-set the logger to Rails.logger
+  RailsBridge::ContentBridge.content_request( :my_request ) do |request|
+    request.protocol = 'http'  # can be 'http' or 'https'.  'http' is the default
+    request.host = "server.com"
+    request.port = 8080 # default is 80
+    request.path = "/some/path"
+    request.params = {:param1=>'a value', :param2=>'another value'}
+    request.default_content = "Content unavailable at this time."
+    request.request_timeout = 1000 # miliseconds
+  end
+  
+Requests are executed using the automatically generated class method:
 
-== CONTRIBUTING:
+  content = RailsBridge::ContentBridge.get_my_request
+  
+This issues an HTTP GET to "http://server.com:8080/some/path?param1=a%20value&param2=another%20value" and returns the content.  If the server is unavailable or the request times out, the default content is returned instead.
 
-=== TESTS:
+You can also simply use the url method to define the protocol, host, port, and path values of a request:
+
+  RailsBridge::ContentBridge.content_request( :my_request ) do |request|
+    request.url = "http://server.com:8080/some/path"
+    request.params = {:param1=>'a value', :param2=>'another value'}
+    request.default_content = "Content unavailable at this time."
+    request.request_timeout = 1000 # miliseconds
+  end
+  
+=== Caching
+
+Content can be automatically cached by specifying a cache timeout for the request.
+
+  RailsBridge::ContentBridge.content_request( :my_request ) do |request|
+    request.url = "http://server.com:8080/some/path"
+    request.params = {:param1=>'a value', :param2=>'another value'}
+    request.default_content = "Content unavailable at this time."
+    request.request_timeout = 1000 # miliseconds
+    request.cache_timeout = 3600 # seconds
+  end
+    
+  content = RailsBridge::ContentBridge.get_my_request
+
+The content returned from first request will be cached for 3600 seconds.  Subsequent requests issued during that time will return the cached content.  
+
+To explicitly skip the cache, override the cache_timeout with a value of 0.  This will also remove any entry in the cache for this request.
+
+  content = RailsBridge::ContentBridge.get_my_request( :cache_timeout=>0 )
+
+The cache key is derived from the complete URL of the request, including query params, so each request with a unique URL is cached independently.
+
+When RailsBridge is loaded in a Rails application, the configured Rails cache is used by default.  When loaded outside Rails, ActiveSupport::Cache::MemoryStore is used by default.
+
+=== One-line requests
+
+If desired, all of the above functionality can be achieved in one line:
+
+  content = RailsBridge::ContentBridge.get_remote_content("http://server.com:8080/some/path?param1=a%20value&param2=another%20value", {:cache_timeout=>3600, :default_content=>"Content Unavailable", :request_timeout=>1000} )
+
+=== Setting defaults for a group of requests.
+
+Default values can be set for a group of requests by sub-classing RailsBridge::ContentBridge and declaring them on the class:
+
+  class TwitterStatusCacher < RailsBridge::ContentBridge
+    self.request_timeout = 500    # miliseconds
+    self.cache_timeout   = 60     # seconds
+    self.host            = 'api.twitter.com'
+    self.path            = '/statuses/user_timeline.json'
+    self.on_success {|content| JSON.parse(content)}
+    
+    content_request( :hoonpark ) {|r| r.params = {:screen_name => 'hoonpark'}}
+    content_request( :soopa ) {|r| r.params = {:screen_name => 'soopa'}}
+  end
+  
+  soopa_latest_tweet = TwitterStatusCacher.get_soopa.first
+  hoonpark_latest_tweet = TwitterStatusCacher.get_hoonpark.first
+  
+
+=== Setting global defaults
+
+Global default values can be set directly on the RailsBridge::ContentBridge class.  They are used by all inheriting sub-classes unless overridden by the sub-class.
+
+  RailsBridge::ContentBridge.logger = Logger.new(STDOUT)
+  RailsBridge::ContentBridge.cache = ActiveSupport::Cache::MemCacheStore(:compress => true)
+  RailsBridge::ContentBridge.cache_timeout = 5.minutes
+  RailsBridge::ContentBridge.request_timeout = 500 # miliseconds
+  
+
+== TODO
+
+
+== DEVELOPMENT
+
+RailsBridge was developed and tested using Ruby v1.9.2 and Rails v3.0.3.  It uses the Typhoeus gem to handle all HTTP requests.  
+
+You may download the source from Github at http://github.com/capitalthought/rails_bridge.  
+
+You can start an IRB session with the RailsBridge code loaded and initialized by running:
+
+  script/console
+  
+
+=== TESTS
 
 RSpec 2.x is used for the Rails Bridge test suite.  To run the suite:
 
@@ -50,6 +135,8 @@ RSpec 2.x is used for the Rails Bridge test suite.  To run the suite:
   
 or
   rake spec
+  
+NOTE: The test suite has an additional dependency on the eventmachine gem to to implement the test HTTP server.
 
 === LICENSE:
 
