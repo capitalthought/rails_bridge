@@ -43,7 +43,7 @@ Requests are executed using the automatically generated class method:
 
   content = RailsBridge::ContentBridge.get_my_request
   
-This issues an HTTP GET to "http://server.com:8080/some/path?param1=a%20value&param2=another%20value" and returns the content.  If the server is unavailable or the request times out, the default content is returned instead.
+This issues an HTTP GET to "http://server.com:8080/some/path?param1=a%20value&param2=another%20value" and returns the content.  If the server is unavailable, returns an error, or if the request times out, the default content is returned instead.
 
 You can also simply use the url method to define the protocol, host, port, and path values of a request:
 
@@ -53,6 +53,19 @@ You can also simply use the url method to define the protocol, host, port, and p
     request.default_content = "Content unavailable at this time."
     request.request_timeout = 1000 # miliseconds
   end
+  
+=== Pre-processing returned content
+
+You may pre-process the content returned by a request by defining an on_success block.  The remote content is passed as a parameter and the return value of the block is used in place of the original content.  
+
+RailsBridge::ContentBridge.content_request( :my_request ) do |request|
+  request.url = "http://server.com:8080/some/path"
+  request.params = {:param1=>'a value', :param2=>'another value'}
+  request.default_content = "Content unavailable at this time."
+  request.request_timeout = 1000 # miliseconds
+  request.on_success {|content| JSON.parse(content)}
+end
+
   
 === Caching
 
