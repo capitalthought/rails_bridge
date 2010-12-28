@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{rails_bridge}
-  s.version = "0.0.2"
+  s.version = "0.0.3"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["shock"]
@@ -105,7 +105,6 @@ Gem::Specification.new do |s|
     "spec/rails_bridge_spec.rb",
     "spec/spec_helper.rb",
     "spec/spec_helpers/rails_bridge.rb",
-    "spec/spec_helpers/simple_cache.rb",
     "spec/spec_helpers/test_server.rb",
     "spec/spec_helpers/textmate.rb"
   ]
