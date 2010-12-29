@@ -1,4 +1,4 @@
-= Rails Bridge
+= RailsBridge
 
 * http://github.com/capitalthought/rails_bridge
 
@@ -8,10 +8,12 @@ Easy embedding of remote content into your Rails app.
 
 == SYNOPSIS
 
-RailsBridge has two components
+RailsBridge has two components.
 
-* RailsBridge::ContentBridge - Allows for easy embedding of content from a remote server directly into the HTML, XML, or Javascript returned by your Rails application.  The remote server may be an external application, a web service, or any other resource available via HTTP on the network.  
-* RailsBridge::LayoutBridge - Allows easy exporting of your Rails HTML layouts as templates for other applications.
+=== RailsBridge::ContentBridge
+Allows for easy embedding of content from a remote server directly into the HTML, XML, or Javascript returned by your Rails application.  The remote server may be an external application, a web service, or any other resource available via HTTP on the network.  
+=== RailsBridge::LayoutBridge
+Allows easy exporting of your Rails HTML layouts as templates for other applications.
 
 == INSTALLATION
 
@@ -23,42 +25,45 @@ Include the gem in your Gemfile.
 
   gem 'rails_bridge'
 
-== USING CONTENT BRIDGE
+---
 
-=== Declaring remote requests
+== USING RailsBridge::ContentBridge
 
-Access to remote content sources is defined by creating "content requests".
+The content bridge is used to retrieve and cache content from external HTTP servers.  This is achieved by defining and executing content requests.  Requests are defined using the RailsBridge::ContentBridge class.
 
-  RailsBridge::ContentBridge.content_request( :my_request ) do |request|
-    request.protocol = 'http'  # can be 'http' or 'https'.  'http' is the default
-    request.host = "server.com"
-    request.port = 8080 # default is 80
-    request.path = "/some/path"
-    request.params = {:param1=>'a value', :param2=>'another value'}
+=== Defining remote requests
+
+  RailsBridge::ContentBridge.content_request( :server_com ) do |request|
+    request.protocol        = 'http'  # can be 'http' or 'https'.  'http' is the default
+    request.host            = "server.com"
+    request.port            = 8080 # default is 80
+    request.path            = "/some/path"
+    request.params          = {:param1=>'a value', :param2=>'another value'}  # URL query params
     request.default_content = "Content unavailable at this time."
     request.request_timeout = 1000 # miliseconds
+    request.cache_timeout   = 5000 # seconds
   end
   
 Requests are executed using the automatically generated class method:
 
-  content = RailsBridge::ContentBridge.get_my_request
+  content = RailsBridge::ContentBridge.get_server_com
   
-This issues an HTTP GET to "http://server.com:8080/some/path?param1=a%20value&param2=another%20value" and returns the content.  If the server is unavailable, returns an error, or if the request times out, the default content is returned instead.
+This issues an HTTP GET to "http://server.com:8080/some/path?param1=a%20value&param2=another%20value" and returns the content.  If the server is unavailable or returns an error, or if the request times out, the default content is returned instead.
 
-You can also simply use the url method to define the protocol, host, port, and path values of a request:
+You can also simply use the url method to define the +protocol+, +host+, +port+, +path+, and +params+  values of a request.  The following declaration is equivalent to the previous example.
 
-  RailsBridge::ContentBridge.content_request( :my_request ) do |request|
-    request.url = "http://server.com:8080/some/path"
-    request.params = {:param1=>'a value', :param2=>'another value'}
+  RailsBridge::ContentBridge.content_request( :server_com ) do |request|
+    request.url = "http://server.com:8080/some/path?p1=value"
     request.default_content = "Content unavailable at this time."
     request.request_timeout = 1000 # miliseconds
+    request.cache_timeout   = 5000 # seconds
   end
   
 === Pre-processing returned content
 
-You may pre-process the content returned by a request by defining an on_success block.  The remote content is passed as a parameter and the return value of the block is used in place of the original content.  
+You may pre-process the content returned by a request by defining an +on_success+ block.  The remote content is passed as a parameter and the return value of the block is used in place of the original content.  
 
-RailsBridge::ContentBridge.content_request( :my_request ) do |request|
+RailsBridge::ContentBridge.content_request( :server_com ) do |request|
   request.url = "http://server.com:8080/some/path"
   request.params = {:param1=>'a value', :param2=>'another value'}
   request.default_content = "Content unavailable at this time."
@@ -66,12 +71,11 @@ RailsBridge::ContentBridge.content_request( :my_request ) do |request|
   request.on_success {|content| JSON.parse(content)}
 end
 
-  
 === Caching
 
-Content can be automatically cached by specifying a cache timeout for the request.
+Content is automatically cached if a cache timeout is defined for the request.
 
-  RailsBridge::ContentBridge.content_request( :my_request ) do |request|
+  RailsBridge::ContentBridge.content_request( :server_com ) do |request|
     request.url = "http://server.com:8080/some/path"
     request.params = {:param1=>'a value', :param2=>'another value'}
     request.default_content = "Content unavailable at this time."
@@ -79,13 +83,13 @@ Content can be automatically cached by specifying a cache timeout for the reques
     request.cache_timeout = 3600 # seconds
   end
     
-  content = RailsBridge::ContentBridge.get_my_request
+  content = RailsBridge::ContentBridge.get_server_com
 
 The content returned from first request will be cached for 3600 seconds.  Subsequent requests issued during that time will return the cached content.  
 
 To explicitly skip the cache, override the cache_timeout with a value of 0.  This will also remove any entry in the cache for this request.
 
-  content = RailsBridge::ContentBridge.get_my_request( :cache_timeout=>0 )
+  content = RailsBridge::ContentBridge.get_server_com( :cache_timeout=>0 )
 
 The cache key is derived from the complete URL of the request, including query params, so each request with a unique URL is cached independently.
 
@@ -99,7 +103,7 @@ If desired, all of the above functionality can be achieved in one line:
 
 === Setting defaults for a group of requests.
 
-Default values can be set for a group of requests by sub-classing RailsBridge::ContentBridge and declaring them on the class:
+Default values can be set for a group of requests by sub-classing RailsBridge::ContentBridge and defining them on the class:
 
   class TwitterStatusCacher < RailsBridge::ContentBridge
     self.request_timeout = 500    # miliseconds
@@ -115,7 +119,6 @@ Default values can be set for a group of requests by sub-classing RailsBridge::C
   soopa_latest_tweet = TwitterStatusCacher.get_soopa.first
   hoonpark_latest_tweet = TwitterStatusCacher.get_hoonpark.first
   
-
 === Setting global defaults
 
 Global default values can be set directly on the RailsBridge::ContentBridge class.  They are used by all inheriting sub-classes unless overridden by the sub-class.
@@ -125,9 +128,18 @@ Global default values can be set directly on the RailsBridge::ContentBridge clas
   RailsBridge::ContentBridge.cache_timeout = 5.minutes
   RailsBridge::ContentBridge.request_timeout = 500 # miliseconds
   
+=== Overriding request values on execution
+
+All defined values for a request can be overridden at runtime by passing them in as options to the get method:
+
+  content = RailsBridge::ContentBridge.get_server_com( :params=>{:p1=>'p1'}, :request_timeout=>2000, :cache_timeout=>0 )
+  
+------------
 
 == TODO
 
+* Create a ContentBridge class method to purge the cache.
+* Put the pre-processor block after the cache get so it can assign to variables on each execution.
 
 == DEVELOPMENT
 
