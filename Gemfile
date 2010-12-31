@@ -17,4 +17,5 @@ group :test, :development do
   gem 'eventmachine'
   gem 'dalli'
   gem 'syntax'
+  gem 'tm_helper', :path=>"/Users/billdoughty/src/capitalthought/tm_helper"
 end

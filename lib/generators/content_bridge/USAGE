@@ -1,0 +1,12 @@
+Description:
+    Creates a RailsBridge::ContentBridge class.
+
+Example:
+    rails generate content_bridge Twitter get_user_status
+
+    This will create:
+        app/rails_bridge/content_bridges
+        app/rails_bridge/content_bridges/twitter_bridge.rb
+    
+    A content_request named 'get_user_status' will be defined in the 
+    generated TwitterContentBridge class.

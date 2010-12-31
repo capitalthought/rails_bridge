@@ -1,2 +1,2 @@
 #!/bin/bash
-irb -r bundler/setup
+irb -r bundler/setup -r rails_bridge

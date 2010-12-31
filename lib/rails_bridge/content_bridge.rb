@@ -60,6 +60,10 @@ module RailsBridge
         if remote.is_a? Symbol
           raise "Undefined content_request :#{remote}" unless remote = @@content_requests[remote]
         end
+        if remote.is_a? Hash
+          remote = RailsBridge::ContentRequest.new remote
+          remote.content_bridge = self
+        end
         if remote.is_a? RailsBridge::ContentRequest
           content_request = remote
           remote_url = content_request.url

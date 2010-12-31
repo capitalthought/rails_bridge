@@ -72,4 +72,8 @@ describe RailsBridge::ContentBridge do
     cbt.get_chang(:cache_timeout=>2,:params=>chang.params.merge(:unique=>unique)).should == cbt.content_requests[:chang].default_content
   end
   
+  it "allows get_remote_content to be called directly with request options" do
+    ContentBridgeTest.get_remote_content(DEFAULT_REQUEST_VALUES).should == DEFAULT_RETURN_DATA
+  end
+    
 end

@@ -18,4 +18,8 @@ describe "initialize test" do
     Rails.cache.should_receive(:set)
     RailsBridge::ContentBridge.cache.set( "key", "value" )
   end
+
+  it "autoloads classes in the app/rails_bridge path" do
+    defined?( TwitterContentBridge ).should == "constant"
+  end
 end

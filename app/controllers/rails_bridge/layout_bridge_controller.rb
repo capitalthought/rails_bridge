@@ -17,16 +17,21 @@ module RailsBridge
 
     def show
       @layout_name = params[:id]
-      string = replace_relative_urls( render_to_string :layout=>@layout_name )
-      render :text=>string
+      custom_content_path = File.join( Rails.root, RailsBridge::LAYOUTS_PATH, @layout_name )
+      bridge_views_path = File.join( Rails.root, RailsBridge::VIEWS_PATH )
+      self.prepend_view_path(custom_content_path)
+      self.prepend_view_path(bridge_views_path)
+      string = replace_relative_urls( render_to_string :layout=>@layout_name, :template=>'content' )
+      render :text=>string, :content_type=>'text/plain'
     end
     
     private
     
       def replace_relative_urls html
         substitutions = [
-          [/(<script.*src\s*? = \s*?")\//, "$1#{site_url}"],  # replace script URLs
-          [/(<link.*?href\s*=\s*")\//, "$1#{site_url}"]         # replace stylesheet URLs
+          [/(<a.*?href\s*=\s*")\//, "$1#{site_url}/"],            # replace anchor URLs
+          [/(<script.*?src\s*?=\s*?")\//, "$1#{site_url}/"],      # replace script URLs
+          [/(<link.*?href\s*=\s*")\//, "$1#{site_url}/"]          # replace stylesheet URLs
         ]
         html.mgpsub( substitutions )
       end

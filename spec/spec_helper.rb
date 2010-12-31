@@ -1,17 +1,18 @@
 # Configure Rails Envinronment
+require "rubygems"
+require "bundler/setup"
+require 'tm_helper'
+
 ENV["RAILS_ENV"] = "test"
 
-LOG_TO_STDOUT = ENV["LOG_TO_STDOUT"] || false
-require "spec_helpers/textmate"
+LOG_TO_STDOUT = ENV["LOG_TO_STDOUT"]
 
 def application_test?
   ENV['TM_FILEPATH'] =~ /integration/ || \
   ENV['TM_FILEPATH'] =~ /requests/
 end
 
-if running_in_textmate? && !application_test?
-  require 'logger'
-  require 'active_support/core_ext/logger'
+if TmHelper.running_in_textmate? && !application_test?
   require File.join(File.dirname(__FILE__),'..','lib','rails_bridge')
 else
   require File.expand_path("../dummy/config/environment.rb",  __FILE__)
@@ -36,11 +37,10 @@ else
 
 end
 
-helper_files = Dir.glob(File.join(File.dirname(__FILE__),'spec_helpers','**','*_helper.rb'))
-helper_files.each {|helper_file| require helper_file}
-
 # Load support files
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
+
+TestServer.logger = RailsBridge::ContentBridge.logger
 
 RSpec.configure do |config|
   # == Mock Framework

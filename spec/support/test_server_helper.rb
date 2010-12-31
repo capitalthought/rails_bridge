@@ -122,6 +122,4 @@ if __FILE__ == $0
   response = Typhoeus::Request.get("http://localhost:1234/hi?sleep=1&return_data=verified")
   puts "response: #{response.inspect}"
   TestServer.shutdown
-else
-  TestServer.logger = RailsBridge::ContentBridge.logger
 end

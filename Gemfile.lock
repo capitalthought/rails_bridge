@@ -20,6 +20,11 @@ PATH
       rails (= 3.0.3)
       typhoeus (~> 0.2.0)
 
+PATH
+  remote: /Users/billdoughty/src/capitalthought/tm_helper
+  specs:
+    tm_helper (0.0.1)
+
 GEM
   remote: http://rubygems.org/
   specs:
@@ -142,5 +147,6 @@ DEPENDENCIES
   rspec-rails
   sqlite3-ruby
   syntax
+  tm_helper!
   typhoeus (~> 0.2.0)
   wdd-ruby-ext (~> 0.2.3)

@@ -4,7 +4,7 @@
 
 == DESCRIPTION
 
-Easy embedding of remote content into your Rails app.
+Easy embedding of remote content into your Rails app, plus exporting of your Rails layouts templatized for other languages (such as PHP).
 
 == SYNOPSIS
 
@@ -14,7 +14,7 @@ RailsBridge has two components.
 Allows for easy embedding of content from a remote server directly into the HTML, XML, or Javascript returned by your Rails application.  The remote server may be an external application, a web service, or any other resource available via HTTP on the network.  
 === RailsBridge::LayoutBridge
 Allows easy exporting of your Rails HTML layouts as templates for other applications.
-
+---
 == INSTALLATION
 
 rails_bridge is installed as a Ruby gem.  
@@ -27,11 +27,42 @@ Include the gem in your Gemfile.
 
 ---
 
-== USING RailsBridge::ContentBridge
+== CONTENT BRIDGE
 
 The content bridge is used to retrieve and cache content from external HTTP servers.  This is achieved by defining and executing content requests.  Requests are defined using the RailsBridge::ContentBridge class.
 
-=== Defining remote requests
+=== Up and Running in 5 minutes
+
+* Install the gem in your Rails app.
+* Generate a content bridge using the provided Rails generator
+  rails g content_bridge twitter_status_cacher
+  
+* Edit the generated class file (app/rails_bridge/content_bridges/twitter_status_cacher.rb).  The following shows an example.
+
+  require 'json'
+  
+  class TwitterStatusCacher < RailsBridge::ContentBridge
+    self.request_timeout = 1000     # miliseconds
+    self.cache_timeout   = 60       # seconds
+    self.host            = 'api.twitter.com'
+    self.path            = '/statuses/user_timeline.json'
+    self.default_content = '<<Twitter unavailable>>'
+    self.on_success {|content| JSON.parse(content).first["text"]}
+  end
+
+* In your controller:
+  @soopa_latest_tweet = TwitterStatusCacher.get_remote_content(:params=>{:screen_name => 'soopa'})
+  
+That's it!  If the request time's out before 1 second, "<<Twitter unavailable>>" will be returned instead.
+If the request succeeds, the content will be cached locally for 60 seconds and returned for each
+subsequent call to 
+  TwitterStatusCacher.get_remote_content(:params=>{:screen_name => 'soopa'})
+
+There are other more flexible ways to define reusable content requests. Read on for more details.
+
+=== Defining reusable requests
+
+Reusable requests can be defined on the ContentBridge class:
 
   RailsBridge::ContentBridge.content_request( :server_com ) do |request|
     request.protocol        = 'http'  # can be 'http' or 'https'.  'http' is the default
@@ -44,13 +75,13 @@ The content bridge is used to retrieve and cache content from external HTTP serv
     request.cache_timeout   = 5000 # seconds
   end
   
-Requests are executed using the automatically generated class method:
+These requests can then be executed using the automatically generated class method:
 
   content = RailsBridge::ContentBridge.get_server_com
   
 This issues an HTTP GET to "http://server.com:8080/some/path?param1=a%20value&param2=another%20value" and returns the content.  If the server is unavailable or returns an error, or if the request times out, the default content is returned instead.
 
-You can also simply use the url method to define the +protocol+, +host+, +port+, +path+, and +params+  values of a request.  The following declaration is equivalent to the previous example.
+You can also simply use the url method to define the +protocol+, +host+, +port+, +path+, and +params+  values of a request.  The following declaration is equivalent to the definition above.
 
   RailsBridge::ContentBridge.content_request( :server_com ) do |request|
     request.url = "http://server.com:8080/some/path?p1=value"
@@ -128,18 +159,49 @@ Global default values can be set directly on the RailsBridge::ContentBridge clas
   RailsBridge::ContentBridge.cache_timeout = 5.minutes
   RailsBridge::ContentBridge.request_timeout = 500 # miliseconds
   
+I recommend putting these declaration in an initializer file under config/initializers.  For example config/initializers/content_bridge.rb.
+  
 === Overriding request values on execution
 
 All defined values for a request can be overridden at runtime by passing them in as options to the get method:
 
   content = RailsBridge::ContentBridge.get_server_com( :params=>{:p1=>'p1'}, :request_timeout=>2000, :cache_timeout=>0 )
   
-------------
+=== Using the provided Rails generator to create ContentBridge classes.
+
+A generator is included named 'content_bridge' that automates generation of content bridge classes in your application.
+
+eg.
+  rails g content_bridge my_content_bridge my_request
+  
+will create a class named +MyContentBridge+ containing a prototype request definition named +my_request+ and place it under _app/rails_bridge/content_bridges.
+
+=== Loading your content bridge classes
+
+All classes under app/rails_bridge/content_bridges will be loaded automatically during application initialization and reloaded when in running in development.
+
+---
+
+== LAYOUT BRIDGE
+
+The layout bridge lets you export your Rails application layouts templatized for other languages.  A controller is automatically included in your app when the 'rails_bridge' gem is installed.  You can access it at:
+
+  http://app_hostname/rails_bridge/layouts
+
+This will show you all of your applications available layouts.  To view a layout without content, click the link of one of the layouts.  You will see the entire HTML layout with no content.  To insert templating content, implement a view for that layout as app/rails_bridge/layouts/<layout_name>/content.html.erb.
+
+In that view, define content for your content_for's and provide the template code to be yielded to the main content area of your layout.
+
+Also, any partials that exist under app/rails_bridge/views will take precedence over those in your normal views directory.  Take advantage of this to override content for layout partials when rendering your templatized layout.
+
+---
 
 == TODO
 
 * Create a ContentBridge class method to purge the cache.
 * Put the pre-processor block after the cache get so it can assign to variables on each execution.
+* Create a Rake task to export LayoutBridge layouts from the command line.
+* Add test to verify partial precedence and content precedence for layout bridge.
 
 == DEVELOPMENT
 
@@ -163,7 +225,9 @@ or
   
 NOTE: The test suite has an additional dependency on the eventmachine gem to to implement the test HTTP server.
 
-=== LICENSE:
+---
+
+== LICENSE
 
   Copyright 2010 Capital Thought, LLC
 

@@ -6,11 +6,11 @@ describe RailsBridge::LayoutBridgeController do
   
   it "the index action returns the applications layouts" do
     visit rails_bridge_layouts_path
-    tm_safe_debug page.source
+    puts page.source
   end
 
   it "the show action returns the specified layout" do
     visit rails_bridge_layout_path(:id=>'application')
-    tm_safe_debug page.source
+    puts page.source
   end
 end
