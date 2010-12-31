@@ -9,3 +9,4 @@ tmp
 **/*.swp
 *.swp
 spec/dummy/log/*
+vendor/bundler

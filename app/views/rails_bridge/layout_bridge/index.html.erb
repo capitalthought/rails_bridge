@@ -1,0 +1,6 @@
+<p>Active layouts</p>
+<ul>
+<% @layouts.each do |name, path| %> 
+  <li><%= link_to(name, url_for(:action=>:show, :id=>name)) %> from <%= path %></li> 
+<% end -%>
+</ul>

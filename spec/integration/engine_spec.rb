@@ -1,8 +1,12 @@
 require 'spec_helper'
 
 describe "initialize test" do
-  it "is" do
+  it "verify the Dummy app gets loaded" do
     Rails.application.kind_of?( Dummy::Application ).should == true
+  end
+
+  it "verify the LayoutBridgeController class is loaded" do
+    defined?( RailsBridge::LayoutBridgeController ).should == "constant"
   end
 
   it "sets the ContentBridge logger to the Rails logger" do

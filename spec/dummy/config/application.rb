@@ -7,7 +7,6 @@ require "action_view/railtie"
 require "action_mailer/railtie"
 
 Bundler.require
-require "rails_bridge"
 
 module Dummy
   class Application < Rails::Application

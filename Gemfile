@@ -2,16 +2,16 @@ source "http://rubygems.org"
 
 gem "activesupport"
 gem 'typhoeus', '~> 0.2.0'
+gem 'rails_bridge', :require=>'rails_bridge', :path=>'.'
+gem 'wdd-ruby-ext', '~> 0.2.3'
 
-# To use debugger (ruby-debug for Ruby 1.8.7+, ruby-debug19 for Ruby 1.9.2+)
-# gem 'ruby-debug'
 # gem 'ruby-debug19'
 
 group :test, :development do
   gem 'rails', '>= 3.0'
   gem 'jeweler'
   gem "sqlite3-ruby", :require => "sqlite3"
-  gem "capybara", ">= 0.4.0"
+  gem "capybara", :git=>'https://github.com/jnicklas/capybara.git', :branch=>'master'
   gem 'rspec'
   gem 'rspec-rails'
   gem 'eventmachine'

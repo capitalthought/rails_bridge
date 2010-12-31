@@ -1,0 +1,2 @@
+module LayoutBridgeSpecHelper
+end
