@@ -16,9 +16,11 @@ GIT
 PATH
   remote: .
   specs:
-    rails_bridge (0.0.3)
-      rails (= 3.0.3)
+    rails_bridge (0.0.4)
+      activesupport
+      rails_bridge
       typhoeus (~> 0.2.0)
+      wdd-ruby-ext (~> 0.2.3)
 
 PATH
   remote: /Users/billdoughty/src/capitalthought/tm_helper

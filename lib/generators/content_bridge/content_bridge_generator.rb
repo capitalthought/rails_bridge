@@ -3,7 +3,7 @@
     source_root File.expand_path('../templates', __FILE__)
     
     def create_class_file
-      template 'content_bridge.rb', File.expand_path(File.join('app/rails_bridge', 'content_bridges', "#{file_name}_content_bridge.rb"))
+      template 'content_bridge.rb', File.expand_path(File.join('app/rails_bridge', 'content_bridges', "#{file_name}.rb"))
     end
         
   end

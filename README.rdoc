@@ -39,16 +39,16 @@ The content bridge is used to retrieve and cache content from external HTTP serv
   
 * Edit the generated class file (app/rails_bridge/content_bridges/twitter_status_cacher.rb).  The following shows an example.
 
-  require 'json'
+    require 'json'
   
-  class TwitterStatusCacher < RailsBridge::ContentBridge
-    self.request_timeout = 1000     # miliseconds
-    self.cache_timeout   = 60       # seconds
-    self.host            = 'api.twitter.com'
-    self.path            = '/statuses/user_timeline.json'
-    self.default_content = '<<Twitter unavailable>>'
-    self.on_success {|content| JSON.parse(content).first["text"]}
-  end
+    class TwitterStatusCacher < RailsBridge::ContentBridge
+      self.request_timeout = 1000     # miliseconds
+      self.cache_timeout   = 60       # seconds
+      self.host            = 'api.twitter.com'
+      self.path            = '/statuses/user_timeline.json'
+      self.default_content = '<<Twitter unavailable>>'
+      self.on_success {|content| JSON.parse(content).first["text"]}
+    end
 
 * In your controller:
   @soopa_latest_tweet = TwitterStatusCacher.get_remote_content(:params=>{:screen_name => 'soopa'})

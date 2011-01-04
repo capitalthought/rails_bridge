@@ -75,5 +75,8 @@ describe RailsBridge::ContentBridge do
   it "allows get_remote_content to be called directly with request options" do
     ContentBridgeTest.get_remote_content(DEFAULT_REQUEST_VALUES).should == DEFAULT_RETURN_DATA
   end
-    
+  
+  it "automatically loads class in the app/rails_bridge/content_bridges directory" do
+    defined?( TwitterContentBridge ).should == 'constant'
+  end
 end
