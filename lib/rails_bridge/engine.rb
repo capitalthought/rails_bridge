@@ -1,5 +1,6 @@
 module RailsBridge
   ROOT_PATH = 'app/rails_bridge'
+  CONTENT_BRIDGES_PATH = File.join( ROOT_PATH, 'content_bridges' )
   LAYOUTS_PATH = File.join(ROOT_PATH, 'layout_bridge', 'layouts')
   VIEWS_PATH = File.join(ROOT_PATH, 'layout_bridge', 'views')
 
@@ -7,7 +8,8 @@ module RailsBridge
   # to get our plugin into the initialization process
   class Engine < Rails::Engine
     
-
+    config.autoload_paths << CONTENT_BRIDGES_PATH
+    
     # initialize our plugin on boot. 
     initializer "rails_bridge.initialize" do |app|
     end
@@ -17,9 +19,7 @@ module RailsBridge
       RailsBridge::ContentBridge.cache = Rails.cache
       RailsBridge::Engine.create_rails_bridge_home
     end
-    
-    config.autoload_paths << ROOT_PATH
-    
+
     def self.create_rails_bridge_home
       rails_bridge_home = File.join( Rails.root, RailsBridge::ROOT_PATH )
       FileUtils.mkdir_p( rails_bridge_home ) unless File.exist?( rails_bridge_home )

@@ -78,5 +78,6 @@ describe RailsBridge::ContentBridge do
   
   it "automatically loads class in the app/rails_bridge/content_bridges directory" do
     defined?( TwitterContentBridge ).should == 'constant'
+    defined?( Tester ).should == 'constant'
   end
 end
