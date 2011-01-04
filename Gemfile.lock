@@ -16,7 +16,7 @@ GIT
 PATH
   remote: .
   specs:
-    rails_bridge (0.0.4)
+    rails_bridge (0.0.5)
       activesupport
       rails_bridge
       typhoeus (~> 0.2.0)
