@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{rails_bridge}
-  s.version = "0.0.5"
+  s.version = "0.0.6"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["shock"]
@@ -41,6 +41,7 @@ Gem::Specification.new do |s|
     "spec/dummy/Rakefile",
     "spec/dummy/app/controllers/application_controller.rb",
     "spec/dummy/app/helpers/application_helper.rb",
+    "spec/dummy/app/rails_bridge/content_bridges/tester.rb",
     "spec/dummy/app/rails_bridge/content_bridges/twitter_content_bridge.rb",
     "spec/dummy/app/rails_bridge/layout_bridge/layouts/application/content.html.erb",
     "spec/dummy/app/rails_bridge/layout_bridge/views/layouts/_partial.html.erb",
@@ -97,6 +98,7 @@ Gem::Specification.new do |s|
   s.test_files = [
     "spec/dummy/app/controllers/application_controller.rb",
     "spec/dummy/app/helpers/application_helper.rb",
+    "spec/dummy/app/rails_bridge/content_bridges/tester.rb",
     "spec/dummy/app/rails_bridge/content_bridges/twitter_content_bridge.rb",
     "spec/dummy/autotest/discover.rb",
     "spec/dummy/config/application.rb",
