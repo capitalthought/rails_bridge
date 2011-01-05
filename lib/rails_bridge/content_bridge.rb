@@ -79,34 +79,48 @@ module RailsBridge
         [remote_url, options]
       end
       
-      def get_remote_content( remote, options={} )
+      def request_remote_content( remote, options={}, &block )
         hydra = Typhoeus::Hydra.hydra # the singleton Hydra
         hydra.disable_memoization
         remote_url, options = process_remote_and_options( remote, options )
         default_content = options.delete(:default_content) || self.default_content
         # options[:verbose] = true # for debugging only
         request = Typhoeus::Request.new(remote_url, options)
-        unless self.cache && request.cache_timeout && request.cache_timeout > 0 && result = cache_get( request.cache_key )
+        if self.cache && request.cache_timeout && request.cache_timeout > 0 && result = cache_get( request.cache_key )
+          # result = on_success.call(result) if on_success
+          block.call(result)
+        else
           result = default_content
           request.on_complete do |response|
             case response.code
             when 200
-              if on_success
-                result = on_success.call(response.body)
-              else
-                result = response.body
-              end
+              result = response.body
+              result = on_success.call(result) if on_success
               cache_set( request.cache_key, result, request.cache_timeout ) if self.cache && request.cache_timeout && request.cache_timeout > 0
               logger.debug "ContentBridge : Request Succeeded - Content: #{result}"
             when 0
               logger.warn "ContentBridge : Request Timeout for #{remote_url}"
             else
               logger.warn "ContentBridge : Request for #{remote_url}\mRequest Failed with HTTP result code: #{response.code}\n#{response.body}"
-            end        
+            end
+            block.call(result)
           end
           hydra.queue request
-          hydra.run # this is a blocking call that returns once all requests are complete
         end
+        nil
+      end
+      
+      def execute_requests
+        hydra = Typhoeus::Hydra.hydra # the singleton Hydra
+        hydra.run
+      end
+      
+      def get_remote_content( remote, options={} )
+        result = nil
+        request_remote_content( remote, options ) do |r_result|
+          result = r_result
+        end
+        execute_requests
         result
       end
       
@@ -125,10 +139,13 @@ module RailsBridge
         new_request
       end
       
-      def method_missing method, *args
+      def method_missing method, *args, &block
         if matches = method.to_s.match( /^get_(.*)$/ )
           request_name = matches[1]
           self.get_remote_content( request_name.to_sym, *args )
+        elsif matches = method.to_s.match( /^request_(.*)$/ )
+          request_name = matches[1]
+          self.request_remote_content( request_name.to_sym, *args, &block )
         else
           super
         end

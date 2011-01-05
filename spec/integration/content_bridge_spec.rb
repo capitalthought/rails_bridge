@@ -22,8 +22,27 @@ describe RailsBridge::ContentBridge do
     ContentBridgeTest.get_remote_content("http://localhost:#{TEST_SERVER_PORT}/")
   end
   
-  it "fetches the server's content" do
+  it "fetches the server's content using get" do
     ContentBridgeTest.get_chang.should == DEFAULT_RETURN_DATA
+  end
+
+  it "fetches the server's content in parallel using request" do
+    cbt = ContentBridgeTest
+    wang = ContentBridgeTest.content_requests[:chang].dup
+    wang.params = wang.params.merge({:return_data=>"other"})
+    cbt.content_requests[:wang] = wang
+    chang_result = wang_result = nil
+    cbt.request_wang do |result|
+      wang_result = result
+    end
+    cbt.request_chang do |result|
+      chang_result = result
+    end
+    wang_result.should == nil
+    chang_result.should == nil
+    cbt.execute_requests
+    chang_result.should == DEFAULT_RETURN_DATA
+    wang_result.should == "other"
   end
 
   it "honors the bridge's request_timeout on a hung connection" do
@@ -56,20 +75,20 @@ describe RailsBridge::ContentBridge do
     unique = __LINE__
     cbt = ContentBridgeTest
     chang = cbt.content_requests[:chang]
-    cbt.get_chang(:cache_timeout=>60,:params=>chang.params.merge(:unique=>unique)).should == DEFAULT_RETURN_DATA
+    cbt.get_chang(:cache_timeout=>60,:params=>{:unique=>unique}).should == DEFAULT_RETURN_DATA
     TestServer.shutdown
-    cbt.get_chang(:cache_timeout=>60,:params=>chang.params.merge(:unique=>unique)).should == DEFAULT_RETURN_DATA
+    cbt.get_chang(:cache_timeout=>60,:params=>{:unique=>unique}).should == DEFAULT_RETURN_DATA
   end
 
   it "the cache expires correctly" do
     unique = __LINE__
     cbt = ContentBridgeTest
     chang = cbt.content_requests[:chang]
-    cbt.get_chang(:cache_timeout=>2,:params=>chang.params.merge(:unique=>unique)).should == DEFAULT_RETURN_DATA
+    cbt.get_chang(:cache_timeout=>2,:params=>{:unique=>unique}).should == DEFAULT_RETURN_DATA
     TestServer.shutdown
-    cbt.get_chang(:cache_timeout=>2,:params=>chang.params.merge(:unique=>unique)).should == DEFAULT_RETURN_DATA
+    cbt.get_chang(:cache_timeout=>2,:params=>{:unique=>unique}).should == DEFAULT_RETURN_DATA
     sleep 2
-    cbt.get_chang(:cache_timeout=>2,:params=>chang.params.merge(:unique=>unique)).should == cbt.content_requests[:chang].default_content
+    cbt.get_chang(:cache_timeout=>2,:params=>{:unique=>unique}).should == cbt.content_requests[:chang].default_content
   end
   
   it "allows get_remote_content to be called directly with request options" do

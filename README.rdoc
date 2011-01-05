@@ -180,6 +180,39 @@ will create a class named +MyContentBridge+ containing a prototype request defin
 
 All classes under app/rails_bridge/content_bridges will be loaded automatically during application initialization and reloaded when in running in development.
 
+
+=== Batching requests for parallel execution
+
+You can also queue up a batch of multiple requests and execute them in parallel to minimize the time it takes to execute them all.  In order to assign the results, you must use the request_<request_name> method and pass a block accepting the result as a parameter which assigns the result to a variable in your context.  When you have scheduled all of your requests, call +execute_requests+ to execute them in parallel.  When +execute_requests+ returns, all of the blocks passed to your request methods will have been executed.
+
+  class TwitterStatusCacher < RailsBridge::ContentBridge
+    self.request_timeout = 2000    # miliseconds
+    self.cache_timeout   = 60     # seconds
+    self.host            = 'api.twitter.com'
+    self.path            = '/statuses/user_timeline.json'
+    self.on_success {|content| JSON.parse(content).first['text']}
+  
+    content_request( :hoonpark ) {|r| r.params = {:screen_name => 'hoonpark'}}
+    content_request( :soopa ) {|r| r.params = {:screen_name => 'soopa'}}
+  end
+
+  
+  soopa_latest_tweet = hoonpark_latest_tweet = nil
+  
+  TwitterStatusCacher.request_soopa do |result|
+    soopa_latest_tweet = result
+  end
+
+  TwitterStatusCacher.request_hoonpark do |result|
+    hoonpark_latest_tweet = result
+  end
+
+  # soopa_latest_tweet and hoonpark_latest_tweet not assigned yet
+
+  TwitterStatusCacher.execute_requests # executes requests in parallel
+  
+  # soopa_latest_tweet and hoonpark_latest_tweet will now be assigned
+
 ---
 
 == LAYOUT BRIDGE
