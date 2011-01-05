@@ -37,7 +37,10 @@ module RailsBridge
     def host;       @host       || (self.content_bridge && self.content_bridge.host);               end
     def port;       @port       || (self.content_bridge && self.content_bridge.port)  || 80;        end
     def path;       @path       || (self.content_bridge && self.content_bridge.path) || '/';        end
-    def params;     @params     || (self.content_bridge && self.content_bridge.params);             end
+    def params
+      content_bridge_params = (self.content_bridge && self.content_bridge.params) || {}
+      content_bridge_params.merge( @params || {} )
+    end
     
     def url= url
       uri = URI.parse( url )

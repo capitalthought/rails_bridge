@@ -152,7 +152,7 @@ Default values can be set for a group of requests by sub-classing RailsBridge::C
   
 === Setting global defaults
 
-Global default values can be set directly on the RailsBridge::ContentBridge class.  They are used by all inheriting sub-classes unless overridden by the sub-class.
+Global default values can be set directly on the RailsBridge::ContentBridge class.  They are used by all inheriting sub-classes unless overridden by the sub-class.  
 
   RailsBridge::ContentBridge.logger = Logger.new(STDOUT)
   RailsBridge::ContentBridge.cache = ActiveSupport::Cache::MemCacheStore(:compress => true)
@@ -163,7 +163,7 @@ I recommend putting these declaration in an initializer file under config/initia
   
 === Overriding request values on execution
 
-All defined values for a request can be overridden at runtime by passing them in as options to the get method:
+All defined values for a request can be specified at runtime by passing them in as options to the get method.  All parameters passed this way will override existing values, with the exception of :params, which are merged with those defined at the request declaration and class level.
 
   content = RailsBridge::ContentBridge.get_server_com( :params=>{:p1=>'p1'}, :request_timeout=>2000, :cache_timeout=>0 )
   

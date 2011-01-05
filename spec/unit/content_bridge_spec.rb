@@ -45,6 +45,15 @@ describe RailsBridge::ContentBridge do
     ContentBridgeTest.get_chang(:default_content=>"YADA YADA").should == "YADA YADA"
   end
 
+  it "adds :params specified at level to those already defined", :focus=>false do    
+    class ContentBridgeTestA < ContentBridgeTest
+      self.params = {:p1=>'p1'}
+      content_request( :yang, :params=>{:p3=>'p3'} )
+    end
+    remote_url, options = ContentBridgeTestA.process_remote_and_options(ContentBridgeTestA.content_requests[:yang], :params=>{:p2=>'p2'})
+    options[:params].should == {:p1=>'p1', :p2=>'p2', :p3=>'p3'}
+  end
+
   it "subclassing a ContentBridge does not change parent class' attributes", :focus=>false do
     class ContentBridgeTest2 < ContentBridgeTest
       self.default_content = "Some other content."

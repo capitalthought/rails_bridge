@@ -52,11 +52,8 @@ module RailsBridge
         logger.debug "get key: #{key}"
         content = self.cache.fetch(key, :race_condition_ttl=>5.seconds)
       end
-
       
-      def get_remote_content( remote, options={} )
-        hydra = Typhoeus::Hydra.hydra # the singleton Hydra
-        hydra.disable_memoization
+      def process_remote_and_options( remote, options )
         if remote.is_a? Symbol
           raise "Undefined content_request :#{remote}" unless remote = @@content_requests[remote]
         end
@@ -67,7 +64,7 @@ module RailsBridge
         if remote.is_a? RailsBridge::ContentRequest
           content_request = remote
           remote_url = content_request.url
-          options[:params] ||= content_request.params
+          options[:params] = content_request.params.merge( options[:params] || {} )
           options[:request_timeout] ||= content_request.request_timeout
           options[:cache_timeout] ||= content_request.cache_timeout
           options[:default_content] ||= content_request.default_content
@@ -79,9 +76,15 @@ module RailsBridge
         options[:request_timeout] ||= self.request_timeout
         options[:cache_timeout] ||= self.cache_timeout
         options[:timeout] = options.delete(:request_timeout)  # Rename the request timeout param for Typhoeus
+        [remote_url, options]
+      end
+      
+      def get_remote_content( remote, options={} )
+        hydra = Typhoeus::Hydra.hydra # the singleton Hydra
+        hydra.disable_memoization
+        remote_url, options = process_remote_and_options( remote, options )
         default_content = options.delete(:default_content) || self.default_content
         # options[:verbose] = true # for debugging only
-        
         request = Typhoeus::Request.new(remote_url, options)
         unless self.cache && request.cache_timeout && request.cache_timeout > 0 && result = cache_get( request.cache_key )
           result = default_content
