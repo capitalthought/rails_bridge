@@ -60,6 +60,28 @@ describe RailsBridge::ContentBridge do
     cbt.get_chang(:params=>{:sleep=>20},:request_timeout=>10).should == cbt.content_requests[:chang].default_content
   end
   
+  it "calls the bridge's on_success proc when defined" do
+    cbt = ContentBridgeTest
+    cbt.on_success do |content|
+      content +"ext"
+    end
+    cbt.get_chang(:cache_timeout=>0).should == DEFAULT_RETURN_DATA+"ext"
+    cbt.on_success = nil
+  end
+  
+  it "calls the request's on_success proc when defined" do
+    cbt = ContentBridgeTest
+    cbt.on_success do |content|
+      content +"ext"
+    end
+    ContentBridgeTest.content_requests[:chang].on_success do |content|
+      content +"ext2"
+    end
+    cbt.get_chang(:cache_timeout=>0).should == DEFAULT_RETURN_DATA+"ext2"
+    cbt.on_success = nil
+    ContentBridgeTest.content_requests[:chang].on_success = nil
+  end
+  
   it "does not cache a request's content when the cache_timeout is 0 or nil" do
     cbt = ContentBridgeTest
     cbt.get_chang(:cache_timeout=>0).should == DEFAULT_RETURN_DATA

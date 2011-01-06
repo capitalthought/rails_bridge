@@ -50,7 +50,8 @@ describe RailsBridge::ContentBridge do
       self.params = {:p1=>'p1'}
       content_request( :yang, :params=>{:p3=>'p3'} )
     end
-    remote_url, options = ContentBridgeTestA.process_remote_and_options(ContentBridgeTestA.content_requests[:yang], :params=>{:p2=>'p2'})
+    content_request = ContentBridgeTestA.get_content_request_from_remote(ContentBridgeTestA.content_requests[:yang])
+    options = ContentBridgeTestA.get_merged_options( content_request, :params=>{:p2=>'p2'} )
     options[:params].should == {:p1=>'p1', :p2=>'p2', :p3=>'p3'}
   end
 

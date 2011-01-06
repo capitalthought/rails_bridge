@@ -14,9 +14,8 @@ module RailsBridge
 
     # Class Attributes
     class_inheritable_accessor :protocol, :host, :port, :path, :params, :request_timeout, :cache_timeout, :default_content
-    class_inheritable_accessor :cache, :logger
+    class_inheritable_accessor :cache, :logger, :on_success
     @@content_requests = {}
-    @@on_success = nil
         
     # Initialize Default Class Attribute Values
     self.request_timeout = DEFAULT_REQUEST_TIMEOUT
@@ -30,18 +29,14 @@ module RailsBridge
       # custom accessor methods
       def content_requests; @@content_requests; end
 
+      alias :cia_on_sucess :on_success
       def on_success
         if block_given?
-          @@on_success = Proc.new
+          self.on_success= Proc.new
         else
-          @@on_success
+          self.cia_on_sucess
         end
       end
-
-      def on_success=(proc)
-        @@on_success = proc
-      end
-
         
       def cache_set key, content, expires_in
         logger.debug "set key: #{key}"
@@ -53,41 +48,45 @@ module RailsBridge
         content = self.cache.fetch(key, :race_condition_ttl=>5.seconds)
       end
       
-      def process_remote_and_options( remote, options )
+      def get_content_request_from_remote( remote )
         if remote.is_a? Symbol
           raise "Undefined content_request :#{remote}" unless remote = @@content_requests[remote]
         end
         if remote.is_a? Hash
           remote = RailsBridge::ContentRequest.new remote
           remote.content_bridge = self
+        elsif remote.is_a? String
+          remote = RailsBridge::ContentRequest.new(:url=>remote)
+          remote.content_bridge = self
+        elsif !remote.is_a? RailsBridge::ContentRequest
+          raise "Unexpected remote type: #{remote.class}"
         end
-        if remote.is_a? RailsBridge::ContentRequest
-          content_request = remote
-          remote_url = content_request.url
-          options[:params] = content_request.params.merge( options[:params] || {} )
-          options[:request_timeout] ||= content_request.request_timeout
-          options[:cache_timeout] ||= content_request.cache_timeout
-          options[:default_content] ||= content_request.default_content
-          on_success = content_request.on_success
-        else
-          remote_url = remote
-          on_sucess = nil
-        end
-        options[:request_timeout] ||= self.request_timeout
-        options[:cache_timeout] ||= self.cache_timeout
-        options[:timeout] = options.delete(:request_timeout)  # Rename the request timeout param for Typhoeus
-        [remote_url, options]
+        remote
+      end
+      
+      # collect options by precedence
+      def get_merged_options( content_request, options )
+        options[:params]          =   content_request.params.merge( options[:params] || {} )
+        options[:request_timeout] ||= content_request.request_timeout || self.request_timeout
+        options[:cache_timeout]   ||= content_request.cache_timeout || self.cache_timeout
+        options[:on_success]      ||= content_request.on_success || self.on_success
+        options[:default_content] ||= content_request.default_content || self.default_content
+        options
       end
       
       def request_remote_content( remote, options={}, &block )
-        hydra = Typhoeus::Hydra.hydra # the singleton Hydra
-        hydra.disable_memoization
-        remote_url, options = process_remote_and_options( remote, options )
-        default_content = options.delete(:default_content) || self.default_content
+        content_request = get_content_request_from_remote( remote )
+        options = get_merged_options( content_request, options )
+        
+        # convert options for Typhoeus
+        options[:timeout] =   options.delete(:request_timeout)  # Rename the request timeout param for Typhoeus
+        on_success_proc = options.delete(:on_success)
+        default_content = options.delete(:default_content)
+        
         # options[:verbose] = true # for debugging only
-        request = Typhoeus::Request.new(remote_url, options)
+
+        request = Typhoeus::Request.new(content_request.url, options)
         if self.cache && request.cache_timeout && request.cache_timeout > 0 && result = cache_get( request.cache_key )
-          # result = on_success.call(result) if on_success
           block.call(result)
         else
           result = default_content
@@ -95,16 +94,18 @@ module RailsBridge
             case response.code
             when 200
               result = response.body
-              result = on_success.call(result) if on_success
+              result = on_success_proc.call(result) if on_success_proc
               cache_set( request.cache_key, result, request.cache_timeout ) if self.cache && request.cache_timeout && request.cache_timeout > 0
               logger.debug "ContentBridge : Request Succeeded - Content: #{result}"
             when 0
-              logger.warn "ContentBridge : Request Timeout for #{remote_url}"
+              logger.warn "ContentBridge : Request Timeout for #{content_request.url}"
             else
-              logger.warn "ContentBridge : Request for #{remote_url}\mRequest Failed with HTTP result code: #{response.code}\n#{response.body}"
+              logger.warn "ContentBridge : Request for #{content_request.url}\mRequest Failed with HTTP result code: #{response.code}\n#{response.body}"
             end
             block.call(result)
           end
+          hydra = Typhoeus::Hydra.hydra # the singleton Hydra
+          hydra.disable_memoization
           hydra.queue request
         end
         nil
