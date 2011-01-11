@@ -11,19 +11,23 @@ Easy embedding of remote content into your Rails app, plus exporting of your Rai
 RailsBridge has two components.
 
 === RailsBridge::ContentBridge
-Allows for easy embedding of content from a remote server directly into the HTML, XML, or Javascript returned by your Rails application.  The remote server may be an external application, a web service, or any other resource available via HTTP on the network.  
+Allows for easy embedding of content from remote servers directly into the HTML, XML, or Javascript returned by your Rails application.  The remote server may be an external application, a web service, or any other resource available via HTTP on the network.  
 === RailsBridge::LayoutBridge
-Allows easy exporting of your Rails HTML layouts as templates for other applications.
+Allows for easy exporting of your Rails HTML layouts as templates for other applications.
+
 ---
+
 == INSTALLATION
 
 rails_bridge is installed as a Ruby gem.  
 
   gem install rails_bridge
-
+  
 Include the gem in your Gemfile.
 
   gem 'rails_bridge'
+
+(Note: RailsBridge depends on the Typhoeus gem.  See CREDITS for more information about installation requirements for Typhoeus if you have difficulty with installation.)
 
 ---
 
@@ -37,20 +41,23 @@ The content bridge is used to retrieve and cache content from external HTTP serv
 * Generate a content bridge using the provided Rails generator
   rails g content_bridge twitter_status_cacher
   
-* Edit the generated class file (app/rails_bridge/content_bridges/twitter_status_cacher.rb).  The following shows an example.
+* Edit the generated class file (app/rails_bridge/content_bridges/twitter_status_cacher.rb).  
 
-    require 'json'
-  
-    class TwitterStatusCacher < RailsBridge::ContentBridge
-      self.request_timeout = 1000     # miliseconds
-      self.cache_timeout   = 60       # seconds
-      self.host            = 'api.twitter.com'
-      self.path            = '/statuses/user_timeline.json'
-      self.default_content = '<<Twitter unavailable>>'
-      self.on_success {|content| JSON.parse(content).first["text"]}
-    end
+The following shows an example.
 
-* In your controller:
+  require 'json'
+
+  class TwitterStatusCacher < RailsBridge::ContentBridge
+    self.request_timeout = 1000     # miliseconds
+    self.cache_timeout   = 60       # seconds
+    self.host            = 'api.twitter.com'
+    self.path            = '/statuses/user_timeline.json'
+    self.default_content = '<<Twitter unavailable>>'
+    self.on_success {|content| JSON.parse(content).first["text"]}
+  end
+
+In your controller:
+
   @soopa_latest_tweet = TwitterStatusCacher.get_remote_content(:params=>{:screen_name => 'soopa'})
   
 That's it!  If the request time's out before 1 second, "<<Twitter unavailable>>" will be returned instead.
@@ -94,13 +101,13 @@ You can also simply use the url method to define the +protocol+, +host+, +port+,
 
 You may pre-process the content returned by a request by defining an +on_success+ block.  The remote content is passed as a parameter and the return value of the block is used in place of the original content.  
 
-RailsBridge::ContentBridge.content_request( :server_com ) do |request|
-  request.url = "http://server.com:8080/some/path"
-  request.params = {:param1=>'a value', :param2=>'another value'}
-  request.default_content = "Content unavailable at this time."
-  request.request_timeout = 1000 # miliseconds
-  request.on_success {|content| JSON.parse(content)}
-end
+  RailsBridge::ContentBridge.content_request( :server_com ) do |request|
+    request.url = "http://server.com:8080/some/path"
+    request.params = {:param1=>'a value', :param2=>'another value'}
+    request.default_content = "Content unavailable at this time."
+    request.request_timeout = 1000 # miliseconds
+    request.on_success {|content| JSON.parse(content)}
+  end
 
 === Caching
 
@@ -176,11 +183,6 @@ eg.
   
 will create a class named +MyContentBridge+ containing a prototype request definition named +my_request+ and place it under _app/rails_bridge/content_bridges.
 
-=== Loading your content bridge classes
-
-All classes under app/rails_bridge/content_bridges will be loaded automatically during application initialization and reloaded when in running in development.
-
-
 === Batching requests for parallel execution
 
 You can also queue up a batch of multiple requests and execute them in parallel to minimize the time it takes to execute them all.  In order to assign the results, you must use the request_<request_name> method and pass a block accepting the result as a parameter which assigns the result to a variable in your context.  When you have scheduled all of your requests, call +execute_requests+ to execute them in parallel.  When +execute_requests+ returns, all of the blocks passed to your request methods will have been executed.
@@ -213,6 +215,10 @@ You can also queue up a batch of multiple requests and execute them in parallel 
   
   # soopa_latest_tweet and hoonpark_latest_tweet will now be assigned
 
+=== Loading your content bridge classes
+
+  All classes under app/rails_bridge/content_bridges will be loaded automatically during application initialization and reloaded when in running in development.
+
 ---
 
 == LAYOUT BRIDGE
@@ -238,7 +244,7 @@ Also, any partials that exist under app/rails_bridge/views will take precedence 
 
 == DEVELOPMENT
 
-RailsBridge was developed and tested using Ruby v1.9.2 and Rails v3.0.3.  It uses the Typhoeus gem to handle all HTTP requests.  
+RailsBridge was developed and tested using Ruby v1.9.2 and Rails v3.0.3.  
 
 You may download the source from Github at http://github.com/capitalthought/rails_bridge.  
 
@@ -256,9 +262,18 @@ RSpec 2.x is used for the Rails Bridge test suite.  To run the suite:
 or
   rake spec
   
-NOTE: The test suite has an additional dependency on the eventmachine gem to to implement the test HTTP server.
+NOTE: The test suite has an additional dependency on the eventmachine gem to to implement a test HTTP server.
 
 ---
+
+== CREDITS
+
+The ContentBridge component of RailsBridge is fundamentally a wrapper around the excellent Typhoeus gem; packaged as a Rails engine with conveniences added for managing content in the context of Rails.  Typhoeus, in turn, depends on a native installation of curl.  
+
+Typhoeus usually installs nicely if you already have curl installed on your OS.  If you have difficulty installing Typhoeus, please refer to the following sources.
+
+* https://github.com/dbalatero/typhoeus
+* http://groups.google.com/group/typhoeus
 
 == LICENSE
 
