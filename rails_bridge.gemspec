@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["shock"]
-  s.date = %q{2011-01-06}
+  s.date = %q{2011-01-11}
   s.description = %q{Allows for easy embedding of content from a remote HTTP server and exporting of the Rails HTML layout into another template.}
   s.email = %q{billdoughty@capitalthought.com}
   s.extra_rdoc_files = [
